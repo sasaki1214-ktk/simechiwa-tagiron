@@ -1524,7 +1524,7 @@ function showChoiceModal(card){
   card.choice.forEach(n=>{
     const b=document.createElement('button');
     b.className='choice-num-btn';
-    b.textContent=n+'だけ';
+    b.textContent=n;
     b.onclick=()=>{
       closeChoiceModal();
       // 選択した数字だけに絞ったfnを作成
