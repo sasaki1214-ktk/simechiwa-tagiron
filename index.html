@@ -554,6 +554,79 @@ header{width:100%;max-width:880px;display:flex;align-items:center;justify-conten
 .win-divider{height:1px;background:var(--border);margin:14px 0;}
 .win-their-tiles-wrap{opacity:.85;}
 .win-opponent-unknown{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);letter-spacing:.1em;padding:8px 0;}
+
+/* ═══════════ LOGIN / ACCOUNT SYSTEM ═══════════ */
+#login-overlay{display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;background:rgba(8,6,2,.97);backdrop-filter:blur(12px);}
+#login-overlay.show{display:flex;}
+.login-panel{background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:38px 44px;max-width:380px;width:92%;position:relative;animation:panelIn .35s cubic-bezier(.34,1.3,.64,1);}
+.login-panel::before{content:'';position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);}
+.login-wordmark{font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.36em;background:linear-gradient(135deg,#e8d090,#c8a050,#a07030);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.login-title{font-family:'Outfit',sans-serif;font-size:21px;color:var(--text);letter-spacing:.06em;margin-bottom:4px;}
+.login-sub{font-family:'Outfit',sans-serif;font-size:11px;color:var(--text3);letter-spacing:.12em;margin-bottom:28px;}
+.login-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px;gap:0;}
+.login-tab{background:transparent;border:none;color:var(--text3);font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:8px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;}
+.login-tab.active{color:var(--gold);border-bottom-color:var(--gold2);}
+.login-tab:hover:not(.active){color:var(--text2);}
+.login-form{display:flex;flex-direction:column;gap:14px;}
+.login-field{display:flex;flex-direction:column;gap:6px;}
+.login-label{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text2);letter-spacing:.2em;text-transform:uppercase;}
+.login-input{background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:15px;padding:8px 0;outline:none;width:100%;transition:border-color .2s;}
+.login-input:focus{border-bottom-color:var(--gold);}
+.login-input::placeholder{color:var(--text3);}
+.login-btn{margin-top:8px;width:100%;padding:12px;background:transparent;border:1px solid var(--gold2);color:var(--gold);font-family:'Outfit',sans-serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .15s;}
+.login-btn:hover{background:var(--gold-glow);}
+.login-err{font-family:'Outfit',sans-serif;font-size:11px;color:var(--danger);min-height:16px;margin-top:2px;}
+.login-guest{margin-top:14px;width:100%;padding:9px;background:transparent;border:1px solid var(--border2);color:var(--text3);font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .15s;}
+.login-guest:hover{border-color:var(--border3);color:var(--text2);}
+
+/* Header account area */
+.header-account{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 8px;border:1px solid transparent;border-radius:2px;transition:border-color .15s,background .15s;}
+.header-account:hover{border-color:var(--border2);background:rgba(200,160,80,.04);}
+.ha-name{font-family:'Outfit',sans-serif;font-size:11px;color:var(--text2);letter-spacing:.1em;}
+.ha-coins{display:flex;align-items:center;gap:4px;font-family:'Outfit',sans-serif;font-size:11px;color:var(--gold);letter-spacing:.06em;}
+.ha-coin-icon{font-size:13px;}
+
+/* ═══════════ ACCOUNT MODAL ═══════════ */
+#account-overlay{display:none;position:fixed;inset:0;z-index:180;align-items:flex-start;justify-content:flex-end;padding:66px 20px 0;}
+#account-overlay.show{display:flex;}
+.account-backdrop{position:absolute;inset:0;}
+.account-panel{pointer-events:auto;position:relative;background:var(--surface);border:1px solid var(--border2);width:280px;border-radius:3px;box-shadow:0 8px 32px rgba(0,0,0,.8);animation:panelIn .18s ease;overflow:hidden;}
+.account-header{padding:16px 18px 12px;border-bottom:1px solid var(--border);}
+.account-username{font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);margin-bottom:2px;}
+.account-role{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);letter-spacing:.18em;text-transform:uppercase;}
+.account-coins-row{display:flex;align-items:center;gap:6px;margin-top:10px;padding:8px 10px;background:rgba(200,160,80,.06);border:1px solid rgba(200,160,80,.15);border-radius:2px;}
+.account-coin-icon{font-size:18px;}
+.account-coin-count{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--gold);}
+.account-coin-label{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);letter-spacing:.1em;margin-top:1px;}
+.account-section{padding:14px 18px;border-bottom:1px solid var(--border);}
+.account-section-label{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);letter-spacing:.24em;text-transform:uppercase;margin-bottom:10px;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.stat-cell{text-align:center;padding:8px 4px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;}
+.stat-num{font-family:'Outfit',sans-serif;font-size:21px;font-weight:700;color:var(--text);}
+.stat-num.win-color{color:#7aba7a;}
+.stat-num.lose-color{color:var(--danger);}
+.stat-num.draw-color{color:var(--gold);}
+.stat-label{font-family:'Outfit',sans-serif;font-size:9px;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-top:2px;}
+.stat-rate{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);text-align:center;margin-top:8px;letter-spacing:.06em;}
+.account-action-row{display:flex;flex-direction:column;gap:6px;padding:12px 18px;}
+.account-act-btn{width:100%;padding:9px;background:transparent;border:1px solid var(--border2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .15s;}
+.account-act-btn:hover{border-color:var(--border3);color:var(--text);}
+.account-act-btn.gacha-btn{border-color:var(--gold2);color:var(--gold);}
+.account-act-btn.gacha-btn:hover{background:var(--gold-glow);}
+.account-act-btn.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+/* coin earn animation */
+.coin-earn-toast{position:fixed;top:80px;right:20px;z-index:500;
+  background:rgba(16,12,6,.96);border:1px solid var(--gold2);border-radius:4px;
+  padding:12px 18px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--gold);
+  letter-spacing:.08em;box-shadow:0 0 24px rgba(200,160,80,.25);
+  animation:toastIn .35s cubic-bezier(.34,1.4,.64,1),toastOut .3s 1.5s ease forwards;
+  pointer-events:none;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-8px)}}
+
+/* ═══════════ GACHA OVERLAY ═══════════ - removed */
+
 </style>
 </head>
 <body>
@@ -562,6 +635,13 @@ header{width:100%;max-width:880px;display:flex;align-items:center;justify-conten
   <div class="wordmark">TAGIRON</div>
   <div class="header-right">
     <div class="header-sub">数字当て推理</div>
+    <!-- Account button (shown when logged in) -->
+    <div id="headerAccount" class="header-account" onclick="toggleAccountPanel()" style="display:none;">
+      <div class="ha-coins"><span class="ha-coin-icon">🪙</span><span id="headerCoinCount">0</span></div>
+      <div class="ha-name" id="headerUsername">—</div>
+    </div>
+    <!-- Login button (shown when not logged in) -->
+    <button id="headerLoginBtn" class="settings-btn" onclick="showLoginOverlay()" title="ログイン" style="display:inline-block;font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.14em;color:var(--text3);">ログイン</button>
     <button class="settings-btn" onclick="toggleSettings()" title="設定">⚙</button>
   </div>
 </header>
@@ -697,6 +777,65 @@ header{width:100%;max-width:880px;display:flex;align-items:center;justify-conten
   </div>
 </div>
 </div><!-- #app -->
+
+<!-- ═══ LOGIN OVERLAY ═══ -->
+<div id="login-overlay">
+  <div class="login-panel">
+    <div class="login-wordmark">TAGIRON</div>
+    <div class="login-title">ようこそ</div>
+    <div class="login-sub">アカウントでログインして戦績とガチャを楽しもう</div>
+    <div class="login-tabs">
+      <button class="login-tab active" id="loginTabLogin" onclick="switchLoginTab('login')">ログイン</button>
+      <button class="login-tab" id="loginTabRegister" onclick="switchLoginTab('register')">新規登録</button>
+    </div>
+    <div class="login-form">
+      <div class="login-field">
+        <div class="login-label">ユーザー名</div>
+        <input class="login-input" id="loginUsername" placeholder="ユーザー名" maxlength="16" autocomplete="username">
+      </div>
+      <div class="login-field">
+        <div class="login-label">パスワード</div>
+        <input class="login-input" id="loginPassword" placeholder="パスワード" type="password" maxlength="32" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="login-err" id="loginErr"></div>
+      <button class="login-btn" onclick="doLogin()" id="loginSubmitBtn">ログイン</button>
+      <button class="login-guest" onclick="doGuestPlay()">ゲストとしてプレイ（戦績は保存されません）</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ACCOUNT OVERLAY ═══ -->
+<div id="account-overlay">
+  <div class="account-backdrop" onclick="closeAccountPanel()"></div>
+  <div class="account-panel">
+    <div class="account-header">
+      <div class="account-username" id="acUsername">—</div>
+      <div class="account-role" id="acRole">プレイヤー</div>
+      <div class="account-coins-row">
+        <span class="account-coin-icon">🪙</span>
+        <div>
+          <div class="account-coin-count" id="acCoins">0</div>
+          <div class="account-coin-label">コイン保有数</div>
+        </div>
+      </div>
+    </div>
+    <div class="account-section">
+      <div class="account-section-label">戦績</div>
+      <div class="stats-grid">
+        <div class="stat-cell"><div class="stat-num win-color" id="acWins">0</div><div class="stat-label">勝利</div></div>
+        <div class="stat-cell"><div class="stat-num lose-color" id="acLoses">0</div><div class="stat-label">敗北</div></div>
+        <div class="stat-cell"><div class="stat-num draw-color" id="acDraws">0</div><div class="stat-label">引分</div></div>
+      </div>
+      <div class="stat-rate" id="acRate">勝率 — %</div>
+    </div>
+    <div class="account-action-row">
+      <button class="account-act-btn logout-btn" onclick="doLogout()">ログアウト</button>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- ═══ QUESTION CARD MODAL ═══ -->
 <div id="qcard-overlay" class="overlay-bg">
@@ -2079,6 +2218,8 @@ function endGame(outcome,detail){
   }
   document.getElementById('win-overlay').classList.add('show');
   if(outcome==='win') spawnParticles();
+  // record result to account
+  _recordResult(outcome);
 }
 
 function renderWinTiles(containerId, tiles){
@@ -2206,10 +2347,235 @@ function renderChatMemo(){
   body.scrollTop=body.scrollHeight;
 }
 
+// ════════════════════════════════════════════════════════
+// ACCOUNT SYSTEM (Supabase)
+// ════════════════════════════════════════════════════════
+
+// ── Supabase設定 ─────────────────────────────────────────
+const SUPABASE_URL='https://lyykadcunkpadmiquwpd.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5eWthZGN1bmtwYWRtaXF1d3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzODgwODMsImV4cCI6MjA4ODk2NDA4M30.6bX8CZHgTvV47K_abpAbGooL_jNFQVzaaTTL8yNsiNM';
+
+// Supabase REST APIヘルパー
+async function sbFetch(path, method='GET', body=null, token=null){
+  const headers={'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+(token||SUPABASE_ANON_KEY)};
+  const res=await fetch(SUPABASE_URL+path,{method,headers,body:body?JSON.stringify(body):null});
+  const text=await res.text();
+  try{return{ok:res.ok,status:res.status,data:text?JSON.parse(text):null};}
+  catch{return{ok:res.ok,status:res.status,data:text};}
+}
+
+// ── セッション管理 ───────────────────────────────────────
+let _currentUser=null;  // {id, username, email, coins, wins, loses, draws, inventory, accessToken, refreshToken}
+let _sbToken=null;      // Supabaseアクセストークン
+
+function _saveSession(user,accessToken,refreshToken){
+  try{localStorage.setItem('tgSbSession',JSON.stringify({user,accessToken,refreshToken}));}catch{}
+}
+function _clearSession(){
+  try{localStorage.removeItem('tgSbSession');}catch{}
+}
+function _loadSession(){
+  try{const s=localStorage.getItem('tgSbSession');return s?JSON.parse(s):null;}catch{return null;}
+}
+
+// ── 登録 ────────────────────────────────────────────────
+async function doRegister(){
+  const un=document.getElementById('loginUsername').value.trim();
+  const pw=document.getElementById('loginPassword').value;
+  const err=document.getElementById('loginErr');
+  err.textContent='';
+  if(!un||!pw){err.textContent='入力してください';return;}
+  if(un.length<2){err.textContent='ユーザー名は2文字以上';return;}
+  if(pw.length<6){err.textContent='パスワードは6文字以上';return;}
+  if(!/^[a-zA-Z0-9_\-ぁ-んァ-ン一-龥]+$/.test(un)){err.textContent='ユーザー名に使えない文字が含まれています';return;}
+  _setLoginLoading(true);
+  // ユーザー名重複チェック
+  const chk=await sbFetch(`/rest/v1/profiles?username=eq.${encodeURIComponent(un)}&select=id`);
+  if(chk.data&&chk.data.length>0){err.textContent='そのユーザー名はすでに使われています';_setLoginLoading(false);return;}
+  // メールアドレスはユーザー名+ダミードメインで内部生成（ユーザーはユーザー名とパスワードのみ入力）
+  const email=un.toLowerCase().replace(/[^a-z0-9]/g,'x')+'_'+Date.now()+'@tagiron.local';
+  const r=await sbFetch('/auth/v1/signup','POST',{email,password:pw,data:{username:un}});
+  if(!r.ok){
+    err.textContent=r.data?.msg||r.data?.message||'登録に失敗しました';
+    _setLoginLoading(false);return;
+  }
+  const token=r.data?.access_token;
+  const uid=r.data?.user?.id;
+  if(!token||!uid){err.textContent='登録エラーが発生しました';_setLoginLoading(false);return;}
+  // profilesテーブルに行を作成（email_hintも保存してログイン時に使う）
+  await sbFetch('/rest/v1/profiles','POST',{id:uid,username:un,email_hint:email,coins:0,wins:0,loses:0,draws:0,inventory:[]},token);
+  // ログイン
+  const profile={id:uid,username:un,coins:0,wins:0,loses:0,draws:0,inventory:[]};
+  _setLoginLoading(false);
+  _onLoginSuccess(profile,token,r.data?.refresh_token);
+}
+
+// ── ログイン ─────────────────────────────────────────────
+async function doLogin(){
+  const un=document.getElementById('loginUsername').value.trim();
+  const pw=document.getElementById('loginPassword').value;
+  const err=document.getElementById('loginErr');
+  err.textContent='';
+  if(!un||!pw){err.textContent='入力してください';return;}
+  _setLoginLoading(true);
+  // usernameからemailを検索
+  const chk=await sbFetch(`/rest/v1/profiles?username=eq.${encodeURIComponent(un)}&select=id,email_hint`);
+  // email_hintがない場合は直接auth試行 → まずusernameで検索してemailを取得する仕組みが必要
+  // Supabaseではemail必須なので、profilesにemail_hintを保存する
+  // 初回登録時にemail_hintも保存する形にする
+  // ここでは別アプローチ: usernameをemailとして直接試みる（旧互換）、
+  // なければprofiles経由でemail_hintを取得する
+  let email=null;
+  const profRes=await sbFetch(`/rest/v1/profiles?username=eq.${encodeURIComponent(un)}&select=id,email_hint`);
+  if(profRes.data&&profRes.data.length>0){
+    email=profRes.data[0].email_hint;
+  }
+  if(!email){err.textContent='ユーザーが見つかりません';_setLoginLoading(false);return;}
+  const r=await sbFetch('/auth/v1/token?grant_type=password','POST',{email,password:pw});
+  if(!r.ok){err.textContent='パスワードが違います';_setLoginLoading(false);return;}
+  const token=r.data?.access_token;
+  const uid=r.data?.user?.id;
+  // profileを取得
+  const pRes=await sbFetch(`/rest/v1/profiles?id=eq.${uid}&select=*`,`GET`,null,token);
+  if(!pRes.data||pRes.data.length===0){err.textContent='プロフィールが見つかりません';_setLoginLoading(false);return;}
+  const profile=pRes.data[0];
+  _setLoginLoading(false);
+  _onLoginSuccess(profile,token,r.data?.refresh_token);
+}
+
+// ── セッション復元 ───────────────────────────────────────
+async function _tryRestoreSession(){
+  const s=_loadSession();
+  if(!s) return;
+  // アクセストークンをリフレッシュ
+  const r=await sbFetch('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:s.refreshToken});
+  if(!r.ok||!r.data?.access_token){_clearSession();return;}
+  const token=r.data.access_token;
+  const uid=r.data.user?.id;
+  const pRes=await sbFetch(`/rest/v1/profiles?id=eq.${uid}&select=*`,'GET',null,token);
+  if(!pRes.data||pRes.data.length===0){_clearSession();return;}
+  _onLoginSuccess(pRes.data[0],token,r.data.refresh_token);
+}
+
+// ── ログイン成功共通処理 ─────────────────────────────────
+function _onLoginSuccess(profile,accessToken,refreshToken){
+  _currentUser={...profile};
+  _sbToken=accessToken;
+  _saveSession(profile,accessToken,refreshToken);
+  hideLoginOverlay();
+  // DOMが確実に準備されてから更新
+  setTimeout(()=>_updateHeaderUI(), 0);
+  document.getElementById('myName').value=profile.username;
+}
+
+// ── ログアウト ───────────────────────────────────────────
+async function doLogout(){
+  if(_sbToken) await sbFetch('/auth/v1/logout','POST',null,_sbToken).catch(()=>{});
+  _currentUser=null; _sbToken=null;
+  _clearSession();
+  closeAccountPanel();
+  _updateHeaderUI();
+}
+
+function doGuestPlay(){hideLoginOverlay();}
+
+// ── Supabaseへデータ保存 ─────────────────────────────────
+async function _saveUserToDb(){
+  if(!_currentUser||!_sbToken) return;
+  await sbFetch(`/rest/v1/profiles?id=eq.${_currentUser.id}`,'PATCH',
+    {coins:_currentUser.coins||0,wins:_currentUser.wins||0,loses:_currentUser.loses||0,draws:_currentUser.draws||0,inventory:_currentUser.inventory||[]},
+    _sbToken);
+}
+
+// ── Header UI ───────────────────────────────────────────
+function _updateHeaderUI(){
+  const loggedIn=!!_currentUser;
+  const acEl=document.getElementById('headerAccount');
+  const lbEl=document.getElementById('headerLoginBtn');
+  if(acEl) acEl.style.display=loggedIn?'flex':'none';
+  if(lbEl) lbEl.style.display=loggedIn?'none':'inline-block';
+  if(loggedIn){
+    const unEl=document.getElementById('headerUsername');
+    const ccEl=document.getElementById('headerCoinCount');
+    if(unEl) unEl.textContent=_currentUser.username;
+    if(ccEl) ccEl.textContent=_currentUser.coins||0;
+  }
+}
+
+// ── ログインフォームUI ───────────────────────────────────
+function showLoginOverlay(){
+  document.getElementById('loginErr').textContent='';
+  document.getElementById('loginUsername').value='';
+  document.getElementById('loginPassword').value='';
+  switchLoginTab('login');
+  document.getElementById('login-overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('loginUsername').focus(),200);
+}
+function hideLoginOverlay(){document.getElementById('login-overlay').classList.remove('show');}
+function switchLoginTab(tab){
+  document.getElementById('loginTabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('loginTabRegister').classList.toggle('active',tab==='register');
+  document.getElementById('loginSubmitBtn').textContent=tab==='login'?'ログイン':'登録してログイン';
+  document.getElementById('loginSubmitBtn').onclick=tab==='login'?doLogin:doRegister;
+  document.getElementById('loginErr').textContent='';
+}
+function _setLoginLoading(on){
+  const btn=document.getElementById('loginSubmitBtn');
+  btn.disabled=on;
+  btn.textContent=on?'処理中…':(btn.textContent.includes('登録')?'登録してログイン':'ログイン');
+}
+
+// ── アカウントパネル ─────────────────────────────────────
+function toggleAccountPanel(){
+  const ov=document.getElementById('account-overlay');
+  if(ov.classList.contains('show')){closeAccountPanel();}
+  else{_renderAccountPanel();ov.classList.add('show');}
+}
+function closeAccountPanel(){document.getElementById('account-overlay').classList.remove('show');}
+function _renderAccountPanel(){
+  if(!_currentUser) return;
+  document.getElementById('acUsername').textContent=_currentUser.username;
+  document.getElementById('acCoins').textContent=_currentUser.coins||0;
+  document.getElementById('acWins').textContent=_currentUser.wins||0;
+  document.getElementById('acLoses').textContent=_currentUser.loses||0;
+  document.getElementById('acDraws').textContent=_currentUser.draws||0;
+  const total=(+_currentUser.wins||0)+(+_currentUser.loses||0)+(+_currentUser.draws||0);
+  document.getElementById('acRate').textContent=total
+    ?'勝率 '+((_currentUser.wins||0)/total*100).toFixed(1)+'%  （'+total+' 試合）'
+    :'まだ試合なし';
+  const coinsEl=document.getElementById('acCoins');
+  if(coinsEl) coinsEl.textContent=_currentUser.coins||0;
+}
+
+// ── コイン獲得・戦績記録 ─────────────────────────────────
+async function _earnCoin(amount){
+  if(!_currentUser) return;
+  _currentUser.coins=(_currentUser.coins||0)+amount;
+  _updateHeaderUI();
+  const t=document.createElement('div');
+  t.className='coin-earn-toast';
+  t.textContent='🪙 +'+amount+' コイン獲得！';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),1900);
+  await _saveUserToDb();
+}
+
+async function _recordResult(outcome){
+  if(!_currentUser) return;
+  if(outcome==='win'){_currentUser.wins=(_currentUser.wins||0)+1;await _earnCoin(1);}
+  else if(outcome==='lose'){_currentUser.loses=(_currentUser.loses||0)+1;await _saveUserToDb();}
+  else if(outcome==='draw'){_currentUser.draws=(_currentUser.draws||0)+1;await _saveUserToDb();}
+}
+
 // Init
 initDOM();
 document.getElementById('myName').value='Player'+Math.floor(Math.random()*900+100);
 document.getElementById('joinCodeInput').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');});
+// Account system init: セッション復元を試み、なければログイン画面を表示
+(async()=>{
+  await _tryRestoreSession();
+  if(!_currentUser) setTimeout(()=>showLoginOverlay(),400);
+})();
 
 </script>
 </body>
