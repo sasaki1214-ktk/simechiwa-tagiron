@@ -113,6 +113,31 @@ select.input{cursor:pointer;}
 .spinner{width:18px;height:18px;border:1.5px solid var(--border2);border-top-color:var(--gold2);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading{text-align:center;padding:32px;font-family:'Outfit',sans-serif;font-size:11px;color:var(--text3);letter-spacing:.12em;}
+
+/* ── File Upload ── */
+.upload-zone{border:2px dashed var(--border2);border-radius:4px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--gold2);background:var(--gold-glow);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:32px;margin-bottom:10px;}
+.upload-label{font-family:'Outfit',sans-serif;font-size:12px;color:var(--text2);letter-spacing:.12em;}
+.upload-sub{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);letter-spacing:.08em;margin-top:4px;}
+.asset-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.asset-tab{padding:6px 14px;background:transparent;border:1px solid var(--border2);color:var(--text3);font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.12em;cursor:pointer;border-radius:2px;transition:all .15s;}
+.asset-tab.active{border-color:var(--gold2);color:var(--gold);background:var(--gold-glow);}
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:16px;}
+.asset-card{background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:12px;text-align:center;position:relative;transition:border-color .15s;}
+.asset-card:hover{border-color:var(--border2);}
+.asset-card img{width:64px;height:64px;object-fit:contain;border-radius:2px;margin-bottom:6px;}
+.asset-card .audio-icon{font-size:36px;margin-bottom:6px;display:block;}
+.asset-name{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text2);letter-spacing:.04em;word-break:break-all;line-height:1.4;}
+.asset-delete{position:absolute;top:4px;right:4px;background:rgba(192,64,48,.15);border:none;color:var(--danger);font-size:11px;cursor:pointer;padding:2px 5px;border-radius:2px;opacity:0;transition:opacity .15s;}
+.asset-card:hover .asset-delete{opacity:1;}
+.asset-copy{display:block;margin-top:6px;padding:3px 0;background:transparent;border:1px solid var(--border);color:var(--text3);font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.08em;cursor:pointer;border-radius:2px;width:100%;transition:all .15s;}
+.asset-copy:hover{border-color:var(--border2);color:var(--text2);}
+.upload-progress{height:3px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden;display:none;}
+.upload-progress-bar{height:100%;background:var(--gold2);border-radius:2px;width:0%;transition:width .3s;}
+.asset-audio-play{display:block;margin-top:4px;padding:3px 0;background:transparent;border:1px solid var(--border);color:var(--text3);font-family:'Outfit',sans-serif;font-size:9px;cursor:pointer;border-radius:2px;width:100%;transition:all .15s;}
+.asset-audio-play:hover{border-color:var(--gold2);color:var(--gold);}
 </style>
 </head>
 <body>
@@ -156,6 +181,7 @@ select.input{cursor:pointer;}
     <button class="nav-tab active" onclick="switchTab('items')">アイテム管理</button>
     <button class="nav-tab" onclick="switchTab('pools')">ガチャプール</button>
     <button class="nav-tab" onclick="switchTab('pool-items')">プール構成</button>
+    <button class="nav-tab" onclick="switchTab('assets')">アセット管理</button>
   </div>
 
   <!-- ══ TAB: Items ══ -->
@@ -211,6 +237,37 @@ select.input{cursor:pointer;}
       </select>
     </div>
     <div id="poolItemsArea"><div class="empty">プールを選択してください</div></div>
+  </div>
+
+
+  <!-- ══ TAB: Assets ══ -->
+  <div class="tab-content" id="tab-assets">
+    <div class="section-header">
+      <div>
+        <div class="section-title">アセット管理</div>
+        <div class="section-sub">BGM・画像ファイルをアップロード・管理します</div>
+      </div>
+    </div>
+    <!-- Upload zone -->
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*,audio/*" multiple onchange="handleFileSelect(this.files)">
+      <div class="upload-icon">📂</div>
+      <div class="upload-label">ファイルをドラッグ＆ドロップ</div>
+      <div class="upload-sub">または クリックしてファイルを選択 ／ JPG・PNG・MP3・OGG対応</div>
+      <div class="upload-progress" id="uploadProgress">
+        <div class="upload-progress-bar" id="uploadProgressBar"></div>
+      </div>
+    </div>
+    <!-- Filter tabs -->
+    <div class="asset-tabs" style="margin-top:24px;">
+      <button class="asset-tab active" onclick="filterAssets('all',this)">すべて</button>
+      <button class="asset-tab" onclick="filterAssets('images',this)">画像</button>
+      <button class="asset-tab" onclick="filterAssets('audio',this)">BGM・音声</button>
+    </div>
+    <!-- Asset grid -->
+    <div class="asset-grid" id="assetGrid">
+      <div class="loading"><span class="spinner"></span>読み込み中…</div>
+    </div>
   </div>
 
 </div>
@@ -323,6 +380,120 @@ select.input{cursor:pointer;}
 
 <script>
 'use strict';
+
+// ── Assets ───────────────────────────────────────────────
+const STORAGE_URL = SUPABASE_URL + '/storage/v1';
+const BUCKET = 'gacha-assets';
+let _allAssets = [];
+let _currentFilter = 'all';
+let _playingAudio = null;
+
+async function loadAssets() {
+  const r = await sbFetch('/storage/v1/object/list/' + BUCKET + '?limit=500&offset=0', 'POST',
+    {prefix:'', sortBy:{column:'created_at', order:'desc'}});
+  if (!r.ok) { showToast('アセットの読み込みに失敗しました', 'error'); return; }
+  _allAssets = (r.data || []).filter(f => f.name !== '.emptyFolderPlaceholder');
+  renderAssets();
+}
+
+function getAssetUrl(name) {
+  return SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + encodeURIComponent(name);
+}
+
+function filterAssets(type, btn) {
+  _currentFilter = type;
+  document.querySelectorAll('.asset-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderAssets();
+}
+
+function isImage(name) { return /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(name); }
+function isAudio(name) { return /\.(mp3|ogg|wav|m4a)$/i.test(name); }
+
+function renderAssets() {
+  const grid = document.getElementById('assetGrid');
+  let files = _allAssets;
+  if (_currentFilter === 'images') files = files.filter(f => isImage(f.name));
+  if (_currentFilter === 'audio')  files = files.filter(f => isAudio(f.name));
+
+  if (!files.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1">ファイルがありません</div>';
+    return;
+  }
+  grid.innerHTML = files.map(f => {
+    const url = getAssetUrl(f.name);
+    const img = isImage(f.name);
+    const aud = isAudio(f.name);
+    return `<div class="asset-card">
+      <button class="asset-delete" onclick="deleteAsset('${f.name}')" title="削除">✕</button>
+      ${img ? `<img src="${url}" alt="${f.name}" loading="lazy">` : ''}
+      ${aud ? `<span class="audio-icon">🎵</span>` : ''}
+      ${!img && !aud ? `<span class="audio-icon">📄</span>` : ''}
+      <div class="asset-name">${f.name}</div>
+      ${aud ? `<button class="asset-audio-play" onclick="playAudio('${url}',this)">▶ 再生</button>` : ''}
+      <button class="asset-copy" onclick="copyUrl('${url}')">URLをコピー</button>
+    </div>`;
+  }).join('');
+}
+
+async function handleFileSelect(files) {
+  if (!files || !files.length) return;
+  const prog = document.getElementById('uploadProgress');
+  const bar  = document.getElementById('uploadProgressBar');
+  prog.style.display = 'block';
+  let done = 0;
+  for (const file of files) {
+    bar.style.width = Math.round(done / files.length * 100) + '%';
+    const res = await fetch(
+      SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + encodeURIComponent(file.name),
+      { method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + _adminToken,
+                   'Content-Type': file.type, 'x-upsert': 'true' },
+        body: file });
+    if (!res.ok) { showToast(file.name + ' のアップロードに失敗しました', 'error'); }
+    else { done++; }
+  }
+  bar.style.width = '100%';
+  setTimeout(() => { prog.style.display = 'none'; bar.style.width = '0%'; }, 800);
+  document.getElementById('fileInput').value = '';
+  showToast(done + ' ファイルをアップロードしました', 'success');
+  loadAssets();
+}
+
+async function deleteAsset(name) {
+  if (!confirm(name + ' を削除しますか？')) return;
+  const r = await sbFetch('/storage/v1/object/' + BUCKET, 'DELETE', { prefixes: [name] });
+  if (!r.ok) { showToast('削除に失敗しました', 'error'); return; }
+  showToast('削除しました', 'success');
+  loadAssets();
+}
+
+function copyUrl(url) {
+  navigator.clipboard.writeText(url).then(() => showToast('URLをコピーしました', 'success'));
+}
+
+function playAudio(url, btn) {
+  if (_playingAudio) { _playingAudio.pause(); _playingAudio = null;
+    document.querySelectorAll('.asset-audio-play').forEach(b => b.textContent = '▶ 再生'); }
+  if (btn.textContent.includes('停止')) return;
+  _playingAudio = new Audio(url);
+  _playingAudio.play();
+  btn.textContent = '■ 停止';
+  _playingAudio.onended = () => { btn.textContent = '▶ 再生'; _playingAudio = null; };
+}
+
+// ── Drag & Drop ──────────────────────────────────────────
+function initDragDrop() {
+  const zone = document.getElementById('uploadZone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    handleFileSelect(e.dataTransfer.files);
+  });
+}
+
 const SUPABASE_URL='https://lyykadcunkpadmiquwpd.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5eWthZGN1bmtwYWRtaXF1d3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzODgwODMsImV4cCI6MjA4ODk2NDA4M30.6bX8CZHgTvV47K_abpAbGooL_jNFQVzaaTTL8yNsiNM';
 
@@ -399,16 +570,18 @@ function showAdminApp(){
   document.getElementById('adminUserDisp').textContent=_adminUser?.username||'—';
   loadItems();
   loadPools();
+  setTimeout(initDragDrop, 300);
 }
 
 // ── Tab ──────────────────────────────────────────────────
 function switchTab(name){
   document.querySelectorAll('.nav-tab').forEach((t,i)=>{
-    const tabs=['items','pools','pool-items'];
+    const tabs=['items','pools','pool-items','assets'];
     t.classList.toggle('active',tabs[i]===name);
   });
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
+  if(name==='assets') loadAssets();
 }
 
 // ── Items ────────────────────────────────────────────────
