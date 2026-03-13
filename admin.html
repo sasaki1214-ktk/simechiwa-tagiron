@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TAGIRON 管理画面</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0b08;--surface:#16120e;--surface2:#1e1810;
+  --border:#2e2618;--border2:#3e3420;--border3:#5a4a2a;
+  --text:#f0e8d8;--text2:#a89878;--text3:#6a5c40;
+  --gold:#c8a050;--gold2:#8a6828;--gold-glow:rgba(200,160,80,.15);
+  --danger:#c04030;--success:#4a8a3a;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;-webkit-font-smoothing:antialiased;}
+
+/* ── Layout ── */
+#app{max-width:1100px;margin:0 auto;padding:0 20px 80px;}
+header{display:flex;align-items:center;justify-content:space-between;padding:28px 0 20px;border-bottom:1px solid var(--border);margin-bottom:32px;}
+.wordmark{font-family:'Outfit',sans-serif;font-size:13px;letter-spacing:.28em;background:linear-gradient(135deg,#e8d090,#c8a050,#a07030);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.admin-badge{font-family:'Outfit',sans-serif;font-size:10px;color:var(--danger);letter-spacing:.2em;border:1px solid var(--danger);padding:2px 8px;border-radius:2px;opacity:.7;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.admin-user{font-family:'Outfit',sans-serif;font-size:11px;color:var(--text3);letter-spacing:.08em;}
+
+/* ── Login ── */
+#loginView{display:flex;align-items:center;justify-content:center;min-height:80vh;}
+.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:40px 44px;width:360px;position:relative;}
+.login-box::before{content:'';position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);}
+.login-title{font-family:'Outfit',sans-serif;font-size:18px;color:var(--text);margin-bottom:4px;}
+.login-sub{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);letter-spacing:.16em;text-transform:uppercase;margin-bottom:28px;}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.field-label{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text2);letter-spacing:.18em;text-transform:uppercase;}
+.input{background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;padding:8px 0;outline:none;width:100%;transition:border-color .2s;}
+.input:focus{border-bottom-color:var(--gold);}
+.input::placeholder{color:var(--text3);}
+.err{font-family:'Outfit',sans-serif;font-size:11px;color:var(--danger);min-height:16px;margin-bottom:8px;}
+.btn{width:100%;padding:11px;background:transparent;border:1px solid var(--gold2);color:var(--gold);font-family:'Outfit',sans-serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .15s;}
+.btn:hover{background:var(--gold-glow);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-danger{border-color:var(--danger);color:var(--danger);}
+.btn-danger:hover{background:rgba(192,64,48,.1);}
+.btn-sm{width:auto;padding:6px 14px;font-size:11px;}
+.btn-secondary{border-color:var(--border2);color:var(--text2);}
+.btn-secondary:hover{border-color:var(--border3);background:rgba(255,255,255,.03);}
+
+/* ── Nav tabs ── */
+.nav-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px;gap:0;}
+.nav-tab{background:transparent;border:none;color:var(--text3);font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;padding:10px 18px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;}
+.nav-tab.active{color:var(--gold);border-bottom-color:var(--gold2);}
+.nav-tab:hover:not(.active){color:var(--text2);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* ── Section ── */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.section-title{font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);letter-spacing:.06em;}
+.section-sub{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);letter-spacing:.14em;margin-top:2px;}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto;margin-bottom:24px;}
+table{width:100%;border-collapse:collapse;}
+th{font-family:'Outfit',sans-serif;font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border2);white-space:nowrap;}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);vertical-align:middle;}
+tr:hover td{background:rgba(255,255,255,.015);}
+.tag{display:inline-block;padding:2px 8px;border-radius:2px;font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;}
+.tag-common{background:rgba(100,100,100,.15);border:1px solid rgba(100,100,100,.3);color:#aaa;}
+.tag-rare{background:rgba(80,120,200,.15);border:1px solid rgba(80,120,200,.3);color:#88aaee;}
+.tag-epic{background:rgba(140,80,200,.15);border:1px solid rgba(140,80,200,.3);color:#bb88ee;}
+.tag-legendary{background:rgba(200,160,50,.15);border:1px solid rgba(200,160,50,.35);color:var(--gold);}
+.tag-active{background:rgba(74,138,58,.15);border:1px solid rgba(74,138,58,.3);color:#7aba7a;}
+.tag-inactive{background:rgba(100,100,100,.1);border:1px solid rgba(100,100,100,.2);color:var(--text3);}
+.tag-event{background:rgba(200,80,80,.15);border:1px solid rgba(200,80,80,.3);color:#e88;}
+.tag-standard{background:rgba(80,120,200,.1);border:1px solid rgba(80,120,200,.2);color:#88aaee;}
+.act-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.icon-cell{font-size:20px;text-align:center;}
+
+/* ── Modal ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(6,4,1,.88);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:4px;padding:32px 36px;width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;position:relative;animation:mIn .22s cubic-bezier(.34,1.3,.64,1);}
+.modal::before{content:'';position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);}
+@keyframes mIn{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-title{font-family:'Outfit',sans-serif;font-size:15px;color:var(--gold);letter-spacing:.08em;margin-bottom:22px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;}
+.form-grid .full{grid-column:1/-1;}
+.form-actions{display:flex;gap:8px;margin-top:22px;}
+.form-actions .btn{flex:1;}
+select.input{cursor:pointer;}
+.toggle-row{display:flex;align-items:center;gap:10px;padding:8px 0;}
+.toggle{width:36px;height:20px;background:var(--border2);border-radius:10px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--success);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;}
+.toggle.on::after{transform:translateX(16px);}
+.toggle-label{font-size:13px;color:var(--text2);}
+
+/* ── Pool items ── */
+.pool-items-section{margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
+.weight-input{width:70px;background:transparent;border:1px solid var(--border2);color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;padding:4px 8px;border-radius:2px;text-align:center;}
+.weight-input:focus{outline:none;border-color:var(--gold2);}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:3px;padding:12px 18px;font-family:'Outfit',sans-serif;font-size:12px;color:var(--text);letter-spacing:.06em;box-shadow:0 4px 20px rgba(0,0,0,.6);animation:tIn .25s ease;pointer-events:none;}
+.toast.success{border-color:rgba(74,138,58,.5);color:#7aba7a;}
+.toast.error{border-color:rgba(192,64,48,.5);color:var(--danger);}
+@keyframes tIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:40px;font-family:'Outfit',sans-serif;font-size:12px;color:var(--text3);letter-spacing:.1em;}
+
+/* ── Loading ── */
+.spinner{width:18px;height:18px;border:1.5px solid var(--border2);border-top-color:var(--gold2);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:32px;font-family:'Outfit',sans-serif;font-size:11px;color:var(--text3);letter-spacing:.12em;}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="loginView">
+  <div class="login-box">
+    <div class="login-title">管理画面</div>
+    <div class="login-sub">TAGIRON Admin</div>
+    <div class="field">
+      <div class="field-label">ユーザー名</div>
+      <input class="input" id="adminUsername" placeholder="管理者ユーザー名" maxlength="32"
+        onkeydown="if(event.key==='Enter')document.getElementById('adminPassword').focus()">
+    </div>
+    <div class="field">
+      <div class="field-label">パスワード</div>
+      <input class="input" id="adminPassword" type="password" placeholder="パスワード" maxlength="64"
+        onkeydown="if(event.key==='Enter')doAdminLogin()">
+    </div>
+    <div class="err" id="loginErr"></div>
+    <button class="btn" id="loginBtn" onclick="doAdminLogin()">ログイン</button>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN APP ══════════ -->
+<div id="adminView" style="display:none;">
+<div id="app">
+  <header>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="wordmark">TAGIRON</div>
+      <div class="admin-badge">ADMIN</div>
+    </div>
+    <div class="header-right">
+      <div class="admin-user" id="adminUserDisp">—</div>
+      <button class="btn btn-sm btn-secondary" onclick="doAdminLogout()">ログアウト</button>
+    </div>
+  </header>
+
+  <!-- Nav -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('items')">アイテム管理</button>
+    <button class="nav-tab" onclick="switchTab('pools')">ガチャプール</button>
+    <button class="nav-tab" onclick="switchTab('pool-items')">プール構成</button>
+  </div>
+
+  <!-- ══ TAB: Items ══ -->
+  <div class="tab-content active" id="tab-items">
+    <div class="section-header">
+      <div>
+        <div class="section-title">アイテム一覧</div>
+        <div class="section-sub">ガチャで排出されるアイテムを管理します</div>
+      </div>
+      <button class="btn btn-sm" onclick="openItemModal()">＋ 追加</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>アイコン</th><th>ID</th><th>名前</th><th>種類</th><th>レアリティ</th><th>状態</th><th>操作</th>
+        </tr></thead>
+        <tbody id="itemsTbody"><tr><td colspan="7"><div class="loading"><span class="spinner"></span>読み込み中…</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAB: Pools ══ -->
+  <div class="tab-content" id="tab-pools">
+    <div class="section-header">
+      <div>
+        <div class="section-title">ガチャプール</div>
+        <div class="section-sub">常設・イベントガチャのプールを管理します</div>
+      </div>
+      <button class="btn btn-sm" onclick="openPoolModal()">＋ 追加</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>ID</th><th>名前</th><th>種別</th><th>コスト</th><th>期間</th><th>状態</th><th>操作</th>
+        </tr></thead>
+        <tbody id="poolsTbody"><tr><td colspan="7"><div class="loading"><span class="spinner"></span>読み込み中…</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAB: Pool Items ══ -->
+  <div class="tab-content" id="tab-pool-items">
+    <div class="section-header">
+      <div>
+        <div class="section-title">プール構成</div>
+        <div class="section-sub">各プールに含まれるアイテムと排出重みを設定します</div>
+      </div>
+    </div>
+    <div class="field" style="max-width:320px;margin-bottom:20px;">
+      <div class="field-label">プールを選択</div>
+      <select class="input" id="poolSelect" onchange="loadPoolItems()">
+        <option value="">— プールを選択 —</option>
+      </select>
+    </div>
+    <div id="poolItemsArea"><div class="empty">プールを選択してください</div></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══ ITEM MODAL ══ -->
+<div class="modal-bg" id="itemModal">
+  <div class="modal">
+    <div class="modal-title" id="itemModalTitle">アイテムを追加</div>
+    <div class="form-grid">
+      <div class="field full">
+        <div class="field-label">アイテムID <span style="color:var(--text3);font-size:9px;">英数字・アンダースコアのみ</span></div>
+        <input class="input" id="fItemId" placeholder="例: bgm_jazz" maxlength="64">
+      </div>
+      <div class="field">
+        <div class="field-label">表示名</div>
+        <input class="input" id="fItemName" placeholder="例: ジャズBGM" maxlength="64">
+      </div>
+      <div class="field">
+        <div class="field-label">アイコン（絵文字）</div>
+        <input class="input" id="fItemIcon" placeholder="🎺" maxlength="8">
+      </div>
+      <div class="field">
+        <div class="field-label">種類</div>
+        <select class="input" id="fItemType">
+          <option value="bgm">BGMテーマ</option>
+          <option value="ui">UIテーマ</option>
+          <option value="icon">プロフィールアイコン</option>
+          <option value="other">その他</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">レアリティ</div>
+        <select class="input" id="fItemRarity">
+          <option value="common">Common</option>
+          <option value="rare">Rare</option>
+          <option value="epic">Epic</option>
+          <option value="legendary">Legendary</option>
+        </select>
+      </div>
+      <div class="field full">
+        <div class="field-label">説明文</div>
+        <input class="input" id="fItemDesc" placeholder="アイテムの説明" maxlength="200">
+      </div>
+      <div class="field full">
+        <div class="field-label">アセットキー <span style="color:var(--text3);font-size:9px;">実装時に使うキー（英数字）</span></div>
+        <input class="input" id="fItemAsset" placeholder="例: jazz" maxlength="64">
+      </div>
+      <div class="field full">
+        <div class="toggle-row">
+          <div class="toggle on" id="fItemActive" onclick="this.classList.toggle('on')"></div>
+          <div class="toggle-label">有効（ガチャで排出される）</div>
+        </div>
+      </div>
+    </div>
+    <div class="err" id="itemModalErr"></div>
+    <div class="form-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closeItemModal()">キャンセル</button>
+      <button class="btn btn-sm" id="itemModalSaveBtn" onclick="saveItem()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POOL MODAL ══ -->
+<div class="modal-bg" id="poolModal">
+  <div class="modal">
+    <div class="modal-title" id="poolModalTitle">プールを追加</div>
+    <div class="form-grid">
+      <div class="field full">
+        <div class="field-label">プールID <span style="color:var(--text3);font-size:9px;">英数字・アンダースコアのみ</span></div>
+        <input class="input" id="fPoolId" placeholder="例: standard / event_2025_summer" maxlength="64">
+      </div>
+      <div class="field full">
+        <div class="field-label">表示名</div>
+        <input class="input" id="fPoolName" placeholder="例: 通常ガチャ / 夏イベント2025" maxlength="64">
+      </div>
+      <div class="field">
+        <div class="field-label">必要コイン枚数</div>
+        <input class="input" id="fPoolCost" type="number" value="5" min="1" max="999">
+      </div>
+      <div class="field">
+        <div class="field-label">種別</div>
+        <select class="input" id="fPoolIsEvent" onchange="toggleEventFields()">
+          <option value="false">常設ガチャ</option>
+          <option value="true">イベントガチャ</option>
+        </select>
+      </div>
+      <div class="field" id="fPoolStartWrap">
+        <div class="field-label">開始日時</div>
+        <input class="input" id="fPoolStart" type="datetime-local">
+      </div>
+      <div class="field" id="fPoolEndWrap">
+        <div class="field-label">終了日時</div>
+        <input class="input" id="fPoolEnd" type="datetime-local">
+      </div>
+      <div class="field full">
+        <div class="toggle-row">
+          <div class="toggle on" id="fPoolActive" onclick="this.classList.toggle('on')"></div>
+          <div class="toggle-label">有効（ゲームに表示される）</div>
+        </div>
+      </div>
+    </div>
+    <div class="err" id="poolModalErr"></div>
+    <div class="form-actions">
+      <button class="btn btn-secondary btn-sm" onclick="closePoolModal()">キャンセル</button>
+      <button class="btn btn-sm" id="poolModalSaveBtn" onclick="savePool()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const SUPABASE_URL='https://lyykadcunkpadmiquwpd.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5eWthZGN1bmtwYWRtaXF1d3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzODgwODMsImV4cCI6MjA4ODk2NDA4M30.6bX8CZHgTvV47K_abpAbGooL_jNFQVzaaTTL8yNsiNM';
+
+let _adminToken=null;
+let _adminUser=null;
+let _editingItemId=null;
+let _editingPoolId=null;
+let _allItems=[];
+let _allPools=[];
+
+// ── Supabase fetch ──────────────────────────────────────
+async function sbFetch(path,method='GET',body=null,token=null){
+  const headers={'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,
+    'Authorization':'Bearer '+(token||_adminToken||SUPABASE_ANON_KEY),
+    'Prefer':'return=representation'};
+  const res=await fetch(SUPABASE_URL+path,{method,headers,body:body?JSON.stringify(body):null});
+  const text=await res.text();
+  try{return{ok:res.ok,status:res.status,data:text?JSON.parse(text):null};}
+  catch{return{ok:res.ok,status:res.status,data:text};}
+}
+
+// ── Login ────────────────────────────────────────────────
+async function doAdminLogin(){
+  const un=document.getElementById('adminUsername').value.trim();
+  const pw=document.getElementById('adminPassword').value;
+  const err=document.getElementById('loginErr');
+  const btn=document.getElementById('loginBtn');
+  err.textContent='';
+  if(!un||!pw){err.textContent='入力してください';return;}
+  btn.disabled=true;btn.textContent='ログイン中…';
+  // email_hintを取得
+  const pRes=await sbFetch(`/rest/v1/profiles?username=eq.${encodeURIComponent(un)}&select=id,email_hint,is_admin`);
+  if(!pRes.data||pRes.data.length===0){err.textContent='ユーザーが見つかりません';btn.disabled=false;btn.textContent='ログイン';return;}
+  const prof=pRes.data[0];
+  if(!prof.is_admin){err.textContent='管理者権限がありません';btn.disabled=false;btn.textContent='ログイン';return;}
+  const r=await sbFetch('/auth/v1/token?grant_type=password','POST',{email:prof.email_hint,password:pw});
+  if(!r.ok){err.textContent='パスワードが違います';btn.disabled=false;btn.textContent='ログイン';return;}
+  _adminToken=r.data.access_token;
+  _adminUser={username:un,...prof};
+  // セッション保存
+  try{localStorage.setItem('tgAdminSession',JSON.stringify({token:_adminToken,refresh:r.data.refresh_token,username:un,email_hint:prof.email_hint}));}catch{}
+  showAdminApp();
+  btn.disabled=false;btn.textContent='ログイン';
+}
+
+async function _tryRestoreAdminSession(){
+  try{
+    const s=localStorage.getItem('tgAdminSession');
+    if(!s) return false;
+    const sess=JSON.parse(s);
+    const r=await sbFetch('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:sess.refresh});
+    if(!r.ok){localStorage.removeItem('tgAdminSession');return false;}
+    // 管理者確認
+    const pRes=await sbFetch(`/rest/v1/profiles?username=eq.${encodeURIComponent(sess.username)}&select=is_admin`,'GET',null,r.data.access_token);
+    if(!pRes.data||!pRes.data[0]?.is_admin){localStorage.removeItem('tgAdminSession');return false;}
+    _adminToken=r.data.access_token;
+    _adminUser={username:sess.username};
+    return true;
+  }catch{return false;}
+}
+
+function doAdminLogout(){
+  _adminToken=null;_adminUser=null;
+  try{localStorage.removeItem('tgAdminSession');}catch{}
+  document.getElementById('adminView').style.display='none';
+  document.getElementById('loginView').style.display='flex';
+  document.getElementById('adminUsername').value='';
+  document.getElementById('adminPassword').value='';
+}
+
+function showAdminApp(){
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('adminView').style.display='block';
+  document.getElementById('adminUserDisp').textContent=_adminUser?.username||'—';
+  loadItems();
+  loadPools();
+}
+
+// ── Tab ──────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>{
+    const tabs=['items','pools','pool-items'];
+    t.classList.toggle('active',tabs[i]===name);
+  });
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ── Items ────────────────────────────────────────────────
+const TYPE_LABELS={bgm:'BGMテーマ',ui:'UIテーマ',icon:'プロフィールアイコン',other:'その他'};
+const RARITY_LABELS={common:'Common',rare:'Rare',epic:'Epic',legendary:'Legendary'};
+
+async function loadItems(){
+  const r=await sbFetch('/rest/v1/gacha_items?select=*&order=created_at.asc');
+  if(!r.ok){showToast('アイテムの読み込みに失敗しました','error');return;}
+  _allItems=r.data||[];
+  renderItems();
+  updatePoolItemsSelect();
+}
+
+function renderItems(){
+  const tbody=document.getElementById('itemsTbody');
+  if(!_allItems.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty">アイテムがありません</div></td></tr>';return;}
+  tbody.innerHTML=_allItems.map(it=>`
+    <tr>
+      <td class="icon-cell">${it.icon||'🎁'}</td>
+      <td><code style="font-size:11px;color:var(--text3)">${it.id}</code></td>
+      <td>${it.name}</td>
+      <td>${TYPE_LABELS[it.type]||it.type}</td>
+      <td><span class="tag tag-${it.rarity}">${RARITY_LABELS[it.rarity]||it.rarity}</span></td>
+      <td><span class="tag ${it.is_active?'tag-active':'tag-inactive'}">${it.is_active?'有効':'無効'}</span></td>
+      <td><div class="act-btns">
+        <button class="btn btn-sm btn-secondary" onclick="openItemModal('${it.id}')">編集</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteItem('${it.id}')">削除</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function openItemModal(id=null){
+  _editingItemId=id;
+  document.getElementById('itemModalTitle').textContent=id?'アイテムを編集':'アイテムを追加';
+  document.getElementById('itemModalErr').textContent='';
+  document.getElementById('fItemId').disabled=!!id;
+  if(id){
+    const it=_allItems.find(x=>x.id===id);
+    if(!it) return;
+    document.getElementById('fItemId').value=it.id;
+    document.getElementById('fItemName').value=it.name;
+    document.getElementById('fItemIcon').value=it.icon||'';
+    document.getElementById('fItemType').value=it.type;
+    document.getElementById('fItemRarity').value=it.rarity;
+    document.getElementById('fItemDesc').value=it.description||'';
+    document.getElementById('fItemAsset').value=it.asset_key||'';
+    document.getElementById('fItemActive').classList.toggle('on',it.is_active);
+  } else {
+    document.getElementById('fItemId').value='';
+    document.getElementById('fItemName').value='';
+    document.getElementById('fItemIcon').value='🎁';
+    document.getElementById('fItemType').value='bgm';
+    document.getElementById('fItemRarity').value='common';
+    document.getElementById('fItemDesc').value='';
+    document.getElementById('fItemAsset').value='';
+    document.getElementById('fItemActive').classList.add('on');
+  }
+  document.getElementById('itemModal').classList.add('show');
+}
+function closeItemModal(){document.getElementById('itemModal').classList.remove('show');}
+
+async function saveItem(){
+  const err=document.getElementById('itemModalErr');
+  const btn=document.getElementById('itemModalSaveBtn');
+  err.textContent='';
+  const id=document.getElementById('fItemId').value.trim();
+  const name=document.getElementById('fItemName').value.trim();
+  if(!id||!name){err.textContent='IDと名前は必須です';return;}
+  if(!_editingItemId&&!/^[a-zA-Z0-9_]+$/.test(id)){err.textContent='IDは英数字とアンダースコアのみ';return;}
+  const data={
+    name,icon:document.getElementById('fItemIcon').value.trim()||'🎁',
+    type:document.getElementById('fItemType').value,
+    rarity:document.getElementById('fItemRarity').value,
+    description:document.getElementById('fItemDesc').value.trim(),
+    asset_key:document.getElementById('fItemAsset').value.trim(),
+    is_active:document.getElementById('fItemActive').classList.contains('on'),
+  };
+  btn.disabled=true;btn.textContent='保存中…';
+  let r;
+  if(_editingItemId){
+    r=await sbFetch(`/rest/v1/gacha_items?id=eq.${_editingItemId}`,'PATCH',data);
+  } else {
+    r=await sbFetch('/rest/v1/gacha_items','POST',{id,...data});
+  }
+  btn.disabled=false;btn.textContent='保存';
+  if(!r.ok){err.textContent='保存に失敗しました: '+(r.data?.message||r.status);return;}
+  showToast(_editingItemId?'アイテムを更新しました':'アイテムを追加しました','success');
+  closeItemModal();
+  loadItems();
+}
+
+async function deleteItem(id){
+  if(!confirm(`アイテム「${id}」を削除しますか？\nプールから除外される可能性があります。`)) return;
+  const r=await sbFetch(`/rest/v1/gacha_items?id=eq.${id}`,'DELETE');
+  if(!r.ok){showToast('削除に失敗しました','error');return;}
+  showToast('削除しました','success');
+  loadItems();
+}
+
+// ── Pools ────────────────────────────────────────────────
+async function loadPools(){
+  const r=await sbFetch('/rest/v1/gacha_pools?select=*&order=created_at.asc');
+  if(!r.ok){showToast('プールの読み込みに失敗しました','error');return;}
+  _allPools=r.data||[];
+  renderPools();
+  updatePoolSelect();
+}
+
+function renderPools(){
+  const tbody=document.getElementById('poolsTbody');
+  if(!_allPools.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty">プールがありません</div></td></tr>';return;}
+  tbody.innerHTML=_allPools.map(p=>{
+    const period=p.is_event
+      ?`${p.start_at?fmtDate(p.start_at):'—'} 〜 ${p.end_at?fmtDate(p.end_at):'—'}`
+      :'常設';
+    return`<tr>
+      <td><code style="font-size:11px;color:var(--text3)">${p.id}</code></td>
+      <td>${p.name}</td>
+      <td><span class="tag ${p.is_event?'tag-event':'tag-standard'}">${p.is_event?'イベント':'常設'}</span></td>
+      <td style="font-family:'Outfit',sans-serif;">🪙 ${p.cost_coins}</td>
+      <td style="font-size:12px;color:var(--text2);">${period}</td>
+      <td><span class="tag ${p.is_active?'tag-active':'tag-inactive'}">${p.is_active?'有効':'無効'}</span></td>
+      <td><div class="act-btns">
+        <button class="btn btn-sm btn-secondary" onclick="openPoolModal('${p.id}')">編集</button>
+        <button class="btn btn-sm btn-danger" onclick="deletePool('${p.id}')">削除</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function fmtDate(str){
+  if(!str) return'—';
+  const d=new Date(str);
+  return`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function openPoolModal(id=null){
+  _editingPoolId=id;
+  document.getElementById('poolModalTitle').textContent=id?'プールを編集':'プールを追加';
+  document.getElementById('poolModalErr').textContent='';
+  document.getElementById('fPoolId').disabled=!!id;
+  if(id){
+    const p=_allPools.find(x=>x.id===id);
+    if(!p) return;
+    document.getElementById('fPoolId').value=p.id;
+    document.getElementById('fPoolName').value=p.name;
+    document.getElementById('fPoolCost').value=p.cost_coins;
+    document.getElementById('fPoolIsEvent').value=String(p.is_event);
+    document.getElementById('fPoolStart').value=p.start_at?p.start_at.slice(0,16):'';
+    document.getElementById('fPoolEnd').value=p.end_at?p.end_at.slice(0,16):'';
+    document.getElementById('fPoolActive').classList.toggle('on',p.is_active);
+  } else {
+    document.getElementById('fPoolId').value='';
+    document.getElementById('fPoolName').value='';
+    document.getElementById('fPoolCost').value='5';
+    document.getElementById('fPoolIsEvent').value='false';
+    document.getElementById('fPoolStart').value='';
+    document.getElementById('fPoolEnd').value='';
+    document.getElementById('fPoolActive').classList.add('on');
+  }
+  toggleEventFields();
+  document.getElementById('poolModal').classList.add('show');
+}
+function closePoolModal(){document.getElementById('poolModal').classList.remove('show');}
+
+function toggleEventFields(){
+  const isEvent=document.getElementById('fPoolIsEvent').value==='true';
+  document.getElementById('fPoolStartWrap').style.display=isEvent?'':'none';
+  document.getElementById('fPoolEndWrap').style.display=isEvent?'':'none';
+}
+
+async function savePool(){
+  const err=document.getElementById('poolModalErr');
+  const btn=document.getElementById('poolModalSaveBtn');
+  err.textContent='';
+  const id=document.getElementById('fPoolId').value.trim();
+  const name=document.getElementById('fPoolName').value.trim();
+  if(!id||!name){err.textContent='IDと名前は必須です';return;}
+  if(!_editingPoolId&&!/^[a-zA-Z0-9_]+$/.test(id)){err.textContent='IDは英数字とアンダースコアのみ';return;}
+  const isEvent=document.getElementById('fPoolIsEvent').value==='true';
+  const data={
+    name,is_event:isEvent,
+    cost_coins:parseInt(document.getElementById('fPoolCost').value)||5,
+    is_active:document.getElementById('fPoolActive').classList.contains('on'),
+    start_at:isEvent&&document.getElementById('fPoolStart').value?new Date(document.getElementById('fPoolStart').value).toISOString():null,
+    end_at:isEvent&&document.getElementById('fPoolEnd').value?new Date(document.getElementById('fPoolEnd').value).toISOString():null,
+  };
+  btn.disabled=true;btn.textContent='保存中…';
+  let r;
+  if(_editingPoolId){
+    r=await sbFetch(`/rest/v1/gacha_pools?id=eq.${_editingPoolId}`,'PATCH',data);
+  } else {
+    r=await sbFetch('/rest/v1/gacha_pools','POST',{id,...data});
+  }
+  btn.disabled=false;btn.textContent='保存';
+  if(!r.ok){err.textContent='保存に失敗しました: '+(r.data?.message||r.status);return;}
+  showToast(_editingPoolId?'プールを更新しました':'プールを追加しました','success');
+  closePoolModal();
+  loadPools();
+}
+
+async function deletePool(id){
+  if(!confirm(`プール「${id}」を削除しますか？\n紐付いているアイテム設定も削除されます。`)) return;
+  const r=await sbFetch(`/rest/v1/gacha_pools?id=eq.${id}`,'DELETE');
+  if(!r.ok){showToast('削除に失敗しました','error');return;}
+  showToast('削除しました','success');
+  loadPools();
+}
+
+// ── Pool Items ────────────────────────────────────────────
+function updatePoolSelect(){
+  const sel=document.getElementById('poolSelect');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— プールを選択 —</option>';
+  _allPools.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value=p.id;opt.textContent=p.name+(p.is_event?' [イベント]':'');
+    sel.appendChild(opt);
+  });
+  if(cur) sel.value=cur;
+}
+function updatePoolItemsSelect(){/* items loaded */}
+
+async function loadPoolItems(){
+  const poolId=document.getElementById('poolSelect').value;
+  const area=document.getElementById('poolItemsArea');
+  if(!poolId){area.innerHTML='<div class="empty">プールを選択してください</div>';return;}
+  area.innerHTML='<div class="loading"><span class="spinner"></span>読み込み中…</div>';
+  const r=await sbFetch(`/rest/v1/gacha_pool_items?pool_id=eq.${poolId}&select=*`);
+  if(!r.ok){area.innerHTML='<div class="empty">読み込みに失敗しました</div>';return;}
+  const poolItems=r.data||[];
+  renderPoolItems(poolId,poolItems);
+}
+
+function renderPoolItems(poolId,poolItems){
+  const area=document.getElementById('poolItemsArea');
+  // 登録済みアイテムID
+  const registeredIds=poolItems.map(x=>x.item_id);
+  // 未登録アイテム一覧（追加候補）
+  const unregistered=_allItems.filter(it=>!registeredIds.includes(it.id));
+
+  let html=`
+  <div class="section-header" style="margin-bottom:12px;">
+    <div class="section-sub">アイテムの重みが高いほど排出されやすくなります（合計値に対する割合）</div>
+  </div>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>アイコン</th><th>アイテム名</th><th>レアリティ</th><th>排出重み</th><th>操作</th></tr></thead>
+    <tbody>`;
+
+  if(!poolItems.length){
+    html+=`<tr><td colspan="5"><div class="empty">アイテムが登録されていません</div></td></tr>`;
+  } else {
+    poolItems.forEach(pi=>{
+      const it=_allItems.find(x=>x.id===pi.item_id)||{name:pi.item_id,icon:'?',rarity:'common'};
+      html+=`<tr>
+        <td class="icon-cell">${it.icon||'🎁'}</td>
+        <td>${it.name}<br><code style="font-size:10px;color:var(--text3)">${pi.item_id}</code></td>
+        <td><span class="tag tag-${it.rarity}">${RARITY_LABELS[it.rarity]||it.rarity}</span></td>
+        <td><input class="weight-input" type="number" min="1" max="9999" value="${pi.weight}" 
+          onchange="updateWeight('${pi.id}',this.value)"></td>
+        <td><button class="btn btn-sm btn-danger" onclick="removePoolItem('${pi.id}')">削除</button></td>
+      </tr>`;
+    });
+  }
+  html+=`</tbody></table></div>`;
+
+  // アイテム追加セクション
+  if(unregistered.length){
+    html+=`<div class="pool-items-section">
+      <div class="section-title" style="font-size:13px;margin-bottom:12px;">アイテムを追加</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select class="input" id="addItemSelect" style="flex:1;max-width:320px;">`;
+    unregistered.forEach(it=>{
+      html+=`<option value="${it.id}">${it.icon||''} ${it.name} [${RARITY_LABELS[it.rarity]||it.rarity}]</option>`;
+    });
+    html+=`</select>
+        <input class="weight-input" type="number" id="addItemWeight" value="100" min="1" max="9999" style="width:80px;">
+        <button class="btn btn-sm" onclick="addPoolItem('${poolId}')">追加</button>
+      </div>
+    </div>`;
+  }
+
+  area.innerHTML=html;
+}
+
+async function addPoolItem(poolId){
+  const itemId=document.getElementById('addItemSelect').value;
+  const weight=parseInt(document.getElementById('addItemWeight').value)||100;
+  if(!itemId) return;
+  const r=await sbFetch('/rest/v1/gacha_pool_items','POST',{pool_id:poolId,item_id:itemId,weight});
+  if(!r.ok){showToast('追加に失敗しました','error');return;}
+  showToast('追加しました','success');
+  loadPoolItems();
+}
+
+async function updateWeight(id,val){
+  const weight=parseInt(val);
+  if(!weight||weight<1) return;
+  const r=await sbFetch(`/rest/v1/gacha_pool_items?id=eq.${id}`,'PATCH',{weight});
+  if(!r.ok){showToast('更新に失敗しました','error');return;}
+  showToast('重みを更新しました','success');
+}
+
+async function removePoolItem(id){
+  if(!confirm('このアイテムをプールから削除しますか？')) return;
+  const r=await sbFetch(`/rest/v1/gacha_pool_items?id=eq.${id}`,'DELETE');
+  if(!r.ok){showToast('削除に失敗しました','error');return;}
+  showToast('削除しました','success');
+  loadPoolItems();
+}
+
+// ── Toast ─────────────────────────────────────────────────
+let _toastTimer=null;
+function showToast(msg,type='success'){
+  if(_toastTimer) clearTimeout(_toastTimer);
+  let t=document.querySelector('.toast');
+  if(!t){t=document.createElement('div');document.body.appendChild(t);}
+  t.className=`toast ${type}`;t.textContent=msg;
+  _toastTimer=setTimeout(()=>t.remove(),2800);
+}
+
+// ── Init ──────────────────────────────────────────────────
+(async()=>{
+  const ok=await _tryRestoreAdminSession();
+  if(ok) showAdminApp();
+})();
+</script>
+</body>
+</html>
