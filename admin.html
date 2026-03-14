@@ -459,7 +459,7 @@ function openItemModal(id=null){
     <div class="form-row half">
       <div class="form-field"><div class="form-label">レアリティ</div>
         <select class="form-select" id="fRarity">
-          ${['common','rare','epic','legendary'].map(r=>`<option value="${r}" ${it?.rarity===r?'selected':''}>${r}</option>`).join('')}
+          ${['☆3','☆4','☆5','☆6'].map(r=>`<option value="${r}" ${it?.rarity===r?'selected':''}>${r}</option>`).join('')}
         </select></div>
       <div class="form-field"><div class="form-label">種別</div>
         <input class="form-input" id="fType" value="${it?.item_type||''}" placeholder="bgm / ui_theme / tile"></div>
