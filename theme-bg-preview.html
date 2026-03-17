@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TAGIRON 背景画像テーマ プレビュー</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── リセット ─── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Noto Sans JP',sans-serif;background:#080608;color:#f0e8f8;overflow-x:hidden;}
+
+/* ─── レイアウト ─── */
+.layout{display:grid;grid-template-columns:320px 1fr;min-height:100vh;}
+
+/* ─── 左パネル（コントロール） ─── */
+.ctrl-panel{
+  background:#0e0a14;border-right:1px solid rgba(255,255,255,.07);
+  padding:28px 22px;display:flex;flex-direction:column;gap:20px;
+  overflow-y:auto;position:sticky;top:0;height:100vh;
+}
+.ctrl-title{
+  font-family:'Outfit',sans-serif;font-size:10px;letter-spacing:.38em;
+  text-transform:uppercase;color:rgba(255,255,255,.25);padding-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.ctrl-section{display:flex;flex-direction:column;gap:10px;}
+.ctrl-label{
+  font-family:'Outfit',sans-serif;font-size:10px;color:rgba(255,255,255,.35);
+  letter-spacing:.18em;text-transform:uppercase;margin-bottom:2px;
+}
+.ctrl-input{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);
+  border-radius:3px;color:#f0e8f8;font-family:'Outfit',sans-serif;font-size:12px;
+  padding:9px 11px;outline:none;transition:border-color .15s;
+}
+.ctrl-input:focus{border-color:rgba(180,120,255,.5);}
+.ctrl-input::placeholder{color:rgba(255,255,255,.2);}
+.ctrl-range{width:100%;accent-color:#b060ff;}
+.ctrl-val{
+  font-family:'Outfit',sans-serif;font-size:11px;color:rgba(180,120,255,.9);
+  text-align:right;margin-top:-6px;
+}
+.ctrl-row{display:flex;gap:8px;}
+.ctrl-swatch{
+  width:32px;height:32px;border-radius:3px;cursor:pointer;
+  border:2px solid transparent;transition:border-color .15s,transform .1s;flex-shrink:0;
+}
+.ctrl-swatch:hover{transform:scale(1.1);}
+.ctrl-swatch.active{border-color:#fff;}
+.ctrl-divider{border:none;border-top:1px solid rgba(255,255,255,.06);}
+.ctrl-btn{
+  width:100%;padding:10px;border:1px solid rgba(180,120,255,.35);
+  background:rgba(180,120,255,.08);color:#d0a0ff;
+  font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;cursor:pointer;border-radius:3px;transition:all .15s;
+}
+.ctrl-btn:hover{background:rgba(180,120,255,.16);border-color:rgba(180,120,255,.6);}
+.hint{font-size:11px;color:rgba(255,255,255,.2);line-height:1.6;}
+
+/* サンプル画像ボタン */
+.sample-imgs{display:flex;flex-wrap:wrap;gap:6px;}
+.sample-btn{
+  flex:1;min-width:calc(50% - 3px);padding:7px 6px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.5);font-family:'Outfit',sans-serif;font-size:10px;
+  letter-spacing:.08em;border-radius:2px;cursor:pointer;transition:all .15s;
+  text-align:center;
+}
+.sample-btn:hover{background:rgba(180,120,255,.1);border-color:rgba(180,120,255,.3);color:#d0a0ff;}
+
+/* ─── 右パネル（プレビュー） ─── */
+.preview-wrap{
+  position:relative;overflow:hidden;
+}
+/* 背景画像レイヤー */
+#previewBg{
+  position:fixed;inset:0;z-index:0;
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+  transition:background-image .3s;
+}
+#previewOverlay{
+  position:fixed;inset:0;z-index:1;
+  background:rgba(6,4,12,.55);
+  transition:background .2s;pointer-events:none;
+}
+.preview-content{
+  position:relative;z-index:2;
+  padding:32px 28px 60px;max-width:860px;margin:0 auto;
+}
+
+/* ─── モックUI ─── */
+.mock-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:18px;border-bottom:1px solid var(--m-border);margin-bottom:28px;
+}
+.mock-wordmark{
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;letter-spacing:.28em;
+  background:var(--m-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.mock-header-right{display:flex;gap:10px;align-items:center;}
+.mock-header-sub{font-family:'Outfit',sans-serif;font-size:9px;color:var(--m-text3);letter-spacing:.28em;text-transform:uppercase;}
+
+/* ロビーブロック */
+.mock-block{
+  background:var(--m-surface);border:1px solid var(--m-border);
+  padding:20px 24px;border-radius:2px;position:relative;margin-bottom:12px;
+  backdrop-filter:blur(var(--m-blur));-webkit-backdrop-filter:blur(var(--m-blur));
+}
+.mock-block::before{
+  content:'';position:absolute;top:0;left:18px;right:18px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--m-accent2),transparent);
+}
+.mock-field-label{
+  font-family:'Outfit',sans-serif;font-size:9px;color:var(--m-text3);
+  letter-spacing:.2em;text-transform:uppercase;margin-bottom:7px;
+}
+.mock-input-bar{
+  border-bottom:1px solid var(--m-border2);padding:7px 0;
+  font-size:14px;color:var(--m-text3);font-family:'Outfit',sans-serif;letter-spacing:.06em;
+}
+.mock-btn-row{display:flex;gap:8px;margin-top:14px;}
+.mock-btn{
+  flex:1;padding:10px;border:1px solid var(--m-border2);background:transparent;
+  color:var(--m-text2);font-family:'Outfit',sans-serif;font-size:11px;
+  letter-spacing:.1em;border-radius:2px;text-align:center;
+}
+.mock-btn.primary{border-color:var(--m-accent2);color:var(--m-accent);}
+
+/* ゲーム画面 */
+.mock-game{margin-top:20px;}
+.mock-players{display:grid;grid-template-columns:1fr 40px 1fr;margin-bottom:0;}
+.mock-pt{
+  background:var(--m-surface);border:1px solid var(--m-border);padding:10px 14px;
+  backdrop-filter:blur(var(--m-blur));-webkit-backdrop-filter:blur(var(--m-blur));
+}
+.mock-pt:first-child{border-right:none;border-radius:2px 0 0 0;}
+.mock-pt:last-child{border-left:none;border-radius:0 2px 0 0;text-align:right;}
+.mock-pt.active{border-color:var(--m-accent2);}
+.mock-pt-role{font-family:'Outfit',sans-serif;font-size:7px;color:var(--m-text3);letter-spacing:.18em;text-transform:uppercase;margin-bottom:2px;}
+.mock-pt-name{font-size:13px;color:var(--m-text);}
+.mock-vs{
+  background:var(--m-surface);border-top:1px solid var(--m-border);border-bottom:1px solid var(--m-border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Outfit',sans-serif;font-size:9px;color:var(--m-text3);
+}
+.mock-felt{
+  background:var(--m-felt);border:1px solid var(--m-border);border-top:none;
+  padding:14px 14px 12px;position:relative;overflow:hidden;
+  backdrop-filter:blur(calc(var(--m-blur) * 0.6));-webkit-backdrop-filter:blur(calc(var(--m-blur) * 0.6));
+}
+.mock-felt::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--m-felt-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--m-felt-line) 1px,transparent 1px);
+  background-size:22px 22px;opacity:.5;
+}
+.mock-felt-label{font-family:'Outfit',sans-serif;font-size:7px;color:var(--m-accent);opacity:.6;letter-spacing:.28em;text-transform:uppercase;margin-bottom:8px;}
+.mock-tiles{display:flex;gap:6px;position:relative;z-index:1;}
+.mock-tile{
+  width:34px;height:48px;border-radius:5px;background:#0a0a0a;
+  border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;
+  font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:#fff;
+  box-shadow:0 3px 10px rgba(0,0,0,.7);
+}
+.mock-tile.back{background:var(--m-tile-back);border-color:var(--m-accent2);color:var(--m-accent);font-size:12px;opacity:.75;}
+.mock-cards{display:flex;gap:6px;padding:10px 14px;background:var(--m-surface);border:1px solid var(--m-border);border-top:none;}
+.mock-qcard{
+  flex:1;background:var(--m-surface2);border:1px solid var(--m-border2);
+  border-radius:2px;padding:7px 9px;font-size:9px;color:var(--m-text2);
+  position:relative;overflow:hidden;min-height:38px;
+}
+.mock-qcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--m-accent2),transparent);opacity:.6;}
+.mock-status{
+  background:var(--m-surface);border:1px solid var(--m-border);border-top:none;
+  padding:8px 14px;display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(var(--m-blur));-webkit-backdrop-filter:blur(var(--m-blur));
+}
+.mock-status-text{font-size:10px;color:var(--m-text);}
+.mock-turn-badge{
+  font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.1em;padding:3px 9px;border-radius:2px;
+  border:1px solid var(--m-accent2);color:var(--m-accent);background:var(--m-glow);text-transform:uppercase;
+}
+.mock-actions{
+  background:var(--m-surface);border:1px solid var(--m-border);border-top:none;
+  border-radius:0 0 2px 2px;padding:7px 14px;display:flex;gap:7px;
+}
+.mock-act{
+  padding:5px 13px;border:1px solid var(--m-border2);background:transparent;
+  color:var(--m-text2);font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.1em;border-radius:2px;
+}
+.mock-act.primary{border-color:var(--m-accent2);color:var(--m-accent);}
+
+/* CSS生成エリア */
+.css-output{
+  margin-top:28px;padding:18px;background:rgba(0,0,0,.6);
+  border:1px solid rgba(255,255,255,.08);border-radius:3px;
+  backdrop-filter:blur(8px);
+}
+.css-output-title{
+  font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.28em;text-transform:uppercase;
+  color:rgba(255,255,255,.3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;
+}
+.css-copy-btn{
+  padding:4px 12px;border:1px solid rgba(180,120,255,.35);background:rgba(180,120,255,.1);
+  color:#d0a0ff;font-family:'Outfit',sans-serif;font-size:9px;letter-spacing:.12em;
+  border-radius:2px;cursor:pointer;transition:all .15s;
+}
+.css-copy-btn:hover{background:rgba(180,120,255,.2);}
+.css-code{
+  font-family:'JetBrains Mono','Courier New',monospace;font-size:11px;
+  color:rgba(255,255,255,.55);line-height:1.7;white-space:pre-wrap;word-break:break-all;
+  max-height:220px;overflow-y:auto;
+}
+
+/* ─── CSS変数（プレビュー用） ─── */
+#previewContent {
+  --m-surface:    rgba(16, 10, 24, 0.78);
+  --m-surface2:   rgba(22, 14, 32, 0.75);
+  --m-border:     rgba(120, 80, 180, 0.30);
+  --m-border2:    rgba(140, 90, 200, 0.40);
+  --m-text:       #f0e8ff;
+  --m-text2:      #b090d8;
+  --m-text3:      #705898;
+  --m-accent:     #d898ff;
+  --m-accent2:    #8040c0;
+  --m-glow:       rgba(216,152,255,.12);
+  --m-felt:       rgba(12, 6, 20, 0.82);
+  --m-felt-line:  rgba(216,152,255,.09);
+  --m-tile-back:  rgba(30,14,50,.9);
+  --m-grad:       linear-gradient(135deg,#f0d0ff,#d898ff,#a050e0);
+  --m-blur:       12px;
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── 左：コントロールパネル ── -->
+  <div class="ctrl-panel">
+    <div class="ctrl-title">背景画像テーマ プレビュー</div>
+
+    <!-- 画像URL -->
+    <div class="ctrl-section">
+      <div class="ctrl-label">画像URL</div>
+      <input class="ctrl-input" id="imgUrl" type="text" placeholder="https://... の画像URLを入力" oninput="updateBg()">
+      <div class="hint">JPG・PNG・WebP対応。CORS許可済みの画像URLを入力してください。</div>
+    </div>
+
+    <!-- サンプル（Unsplash） -->
+    <div class="ctrl-section">
+      <div class="ctrl-label">サンプル背景</div>
+      <div class="sample-imgs">
+        <button class="sample-btn" onclick="setSample('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1600&q=80','sakura')">🌸 桜</button>
+        <button class="sample-btn" onclick="setSample('https://images.unsplash.com/photo-1446034295857-a39f8848fd2b?w=1600&q=80','night')">🌃 夜景</button>
+        <button class="sample-btn" onclick="setSample('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&q=80','mountain')">🏔️ 山岳</button>
+        <button class="sample-btn" onclick="setSample('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1600&q=80','space')">🌌 宇宙</button>
+        <button class="sample-btn" onclick="setSample('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1600&q=80','forest')">🌿 森</button>
+        <button class="sample-btn" onclick="setSample('https://images.unsplash.com/photo-1489549132488-d00b7eee80f1?w=1600&q=80','ocean')">🌊 海</button>
+      </div>
+    </div>
+
+    <hr class="ctrl-divider">
+
+    <!-- オーバーレイ透明度 -->
+    <div class="ctrl-section">
+      <div class="ctrl-label">オーバーレイ（暗さ）</div>
+      <input class="ctrl-range" id="overlayOp" type="range" min="0" max="85" value="55" oninput="updateOverlay()">
+      <div class="ctrl-val" id="overlayVal">55%</div>
+    </div>
+
+    <!-- パネル透明度 -->
+    <div class="ctrl-section">
+      <div class="ctrl-label">パネルの透明度</div>
+      <input class="ctrl-range" id="panelOp" type="range" min="40" max="98" value="78" oninput="updatePanel()">
+      <div class="ctrl-val" id="panelVal">78%</div>
+    </div>
+
+    <!-- ぼかし強度 -->
+    <div class="ctrl-section">
+      <div class="ctrl-label">パネルのぼかし（blur）</div>
+      <input class="ctrl-range" id="blurVal" type="range" min="0" max="24" value="12" oninput="updateBlur()">
+      <div class="ctrl-val" id="blurDisplay">12px</div>
+    </div>
+
+    <hr class="ctrl-divider">
+
+    <!-- アクセントカラー -->
+    <div class="ctrl-section">
+      <div class="ctrl-label">アクセントカラー</div>
+      <div class="ctrl-row" id="accentSwatches">
+        <div class="ctrl-swatch active" style="background:linear-gradient(135deg,#d898ff,#8040c0);" data-accent='{"accent":"#d898ff","accent2":"#8040c0","glow":"rgba(216,152,255,.15)","grad":"linear-gradient(135deg,#f0d0ff,#d898ff,#a050e0)"}' onclick="setAccent(this)" title="パープル"></div>
+        <div class="ctrl-swatch" style="background:linear-gradient(135deg,#40c8e8,#1a6888);" data-accent='{"accent":"#40c8e8","accent2":"#1a6888","glow":"rgba(64,200,232,.15)","grad":"linear-gradient(135deg,#a0e8f8,#40c8e8,#1888b8)"}' onclick="setAccent(this)" title="シアン"></div>
+        <div class="ctrl-swatch" style="background:linear-gradient(135deg,#f490d8,#a03880);" data-accent='{"accent":"#f490d8","accent2":"#a03880","glow":"rgba(244,144,216,.15)","grad":"linear-gradient(135deg,#ffd8f8,#f490d8,#c060b0)"}' onclick="setAccent(this)" title="ピンク"></div>
+        <div class="ctrl-swatch" style="background:linear-gradient(135deg,#60d878,#1e7838);" data-accent='{"accent":"#60d878","accent2":"#1e7838","glow":"rgba(96,216,120,.15)","grad":"linear-gradient(135deg,#a0f0b0,#60d878,#208840)"}' onclick="setAccent(this)" title="グリーン"></div>
+        <div class="ctrl-swatch" style="background:linear-gradient(135deg,#ffb060,#c06820);" data-accent='{"accent":"#ffb060","accent2":"#c06820","glow":"rgba(255,176,96,.15)","grad":"linear-gradient(135deg,#ffe0b0,#ffb060,#e07030)"}' onclick="setAccent(this)" title="オレンジ"></div>
+        <div class="ctrl-swatch" style="background:linear-gradient(135deg,#e84080,#882040);" data-accent='{"accent":"#e84080","accent2":"#882040","glow":"rgba(232,64,128,.15)","grad":"linear-gradient(135deg,#f8a0c0,#e84080,#a02050)"}' onclick="setAccent(this)" title="レッド"></div>
+      </div>
+    </div>
+
+    <hr class="ctrl-divider">
+
+    <!-- CSS生成ボタン -->
+    <button class="ctrl-btn" onclick="generateCSS()">⬇ このCSSを生成</button>
+    <div class="hint">設定をCSSに書き出してコピーできます。</div>
+  </div>
+
+  <!-- ── 右：プレビュー ── -->
+  <div class="preview-wrap">
+    <div id="previewBg"></div>
+    <div id="previewOverlay"></div>
+
+    <div class="preview-content" id="previewContent">
+
+      <!-- ヘッダー -->
+      <div class="mock-header">
+        <span class="mock-wordmark">TAGIRON</span>
+        <div class="mock-header-right">
+          <span class="mock-header-sub">Online</span>
+        </div>
+      </div>
+
+      <!-- ロビー -->
+      <div class="mock-block">
+        <div class="mock-field-label">プレイヤー名</div>
+        <div class="mock-input-bar">Player123</div>
+        <div class="mock-btn-row">
+          <div class="mock-btn">ルームを作る</div>
+          <div class="mock-btn primary">参加する</div>
+        </div>
+      </div>
+
+      <!-- ゲーム画面 -->
+      <div class="mock-game">
+        <div class="mock-players">
+          <div class="mock-pt active">
+            <div class="mock-pt-role">You</div>
+            <div class="mock-pt-name">Player123</div>
+          </div>
+          <div class="mock-vs">VS</div>
+          <div class="mock-pt">
+            <div class="mock-pt-role">Opponent</div>
+            <div class="mock-pt-name">Player456</div>
+          </div>
+        </div>
+        <div class="mock-felt">
+          <div class="mock-felt-label">Your Tiles</div>
+          <div class="mock-tiles">
+            <div class="mock-tile">3</div>
+            <div class="mock-tile">7</div>
+            <div class="mock-tile">1</div>
+            <div class="mock-tile back">?</div>
+            <div class="mock-tile back">?</div>
+          </div>
+        </div>
+        <div class="mock-cards">
+          <div class="mock-qcard">合計は？</div>
+          <div class="mock-qcard">何色？</div>
+          <div class="mock-qcard">最大値</div>
+        </div>
+        <div class="mock-status">
+          <span class="mock-status-text">ターン 5</span>
+          <span class="mock-turn-badge">Your Turn</span>
+        </div>
+        <div class="mock-actions">
+          <div class="mock-act">質問する</div>
+          <div class="mock-act primary">宣言する</div>
+        </div>
+      </div>
+
+      <!-- CSS出力エリア -->
+      <div class="css-output" id="cssOutput" style="display:none;">
+        <div class="css-output-title">
+          生成されたCSS
+          <button class="css-copy-btn" onclick="copyCSS()">コピー</button>
+        </div>
+        <div class="css-code" id="cssCode"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 状態 ──
+let state = {
+  imageUrl: '',
+  overlayOp: 55,
+  panelOp: 78,
+  blur: 12,
+  accent:  '#d898ff',
+  accent2: '#8040c0',
+  glow:    'rgba(216,152,255,.15)',
+  grad:    'linear-gradient(135deg,#f0d0ff,#d898ff,#a050e0)',
+};
+
+function updateBg(){
+  const url = document.getElementById('imgUrl').value.trim();
+  state.imageUrl = url;
+  document.getElementById('previewBg').style.backgroundImage = url ? `url('${url}')` : 'none';
+}
+
+function setSample(url, key){
+  state.imageUrl = url;
+  document.getElementById('imgUrl').value = url;
+  document.getElementById('previewBg').style.backgroundImage = `url('${url}')`;
+}
+
+function updateOverlay(){
+  const v = document.getElementById('overlayOp').value;
+  state.overlayOp = parseInt(v);
+  document.getElementById('overlayVal').textContent = v + '%';
+  document.getElementById('previewOverlay').style.background = `rgba(6,4,12,${v/100})`;
+}
+
+function updatePanel(){
+  const v = document.getElementById('panelOp').value;
+  state.panelOp = parseInt(v);
+  document.getElementById('panelVal').textContent = v + '%';
+  const op = v/100;
+  const pc = document.getElementById('previewContent');
+  pc.style.setProperty('--m-surface',  `rgba(16,10,24,${op})`);
+  pc.style.setProperty('--m-surface2', `rgba(22,14,32,${Math.max(op-0.03,0)})`);
+  pc.style.setProperty('--m-felt',     `rgba(12,6,20,${Math.min(op+0.05,1)})`);
+}
+
+function updateBlur(){
+  const v = document.getElementById('blurVal').value;
+  state.blur = parseInt(v);
+  document.getElementById('blurDisplay').textContent = v + 'px';
+  document.getElementById('previewContent').style.setProperty('--m-blur', v + 'px');
+}
+
+function setAccent(el){
+  document.querySelectorAll('.ctrl-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  const d = JSON.parse(el.dataset.accent);
+  state.accent  = d.accent;
+  state.accent2 = d.accent2;
+  state.glow    = d.glow;
+  state.grad    = d.grad;
+  const pc = document.getElementById('previewContent');
+  pc.style.setProperty('--m-accent',  d.accent);
+  pc.style.setProperty('--m-accent2', d.accent2);
+  pc.style.setProperty('--m-glow',    d.glow);
+  pc.style.setProperty('--m-grad',    d.grad);
+}
+
+function generateCSS(){
+  const op = state.panelOp/100;
+  const feltOp = Math.min(op+0.05,1).toFixed(2);
+  const panelOp2 = Math.max(op-0.03,0).toFixed(2);
+  const css = `/* TAGIRON UI Theme: カスタム背景テーマ */
+/* 生成日時: ${new Date().toLocaleString('ja-JP')} */
+
+:root {
+  --theme-image: url('${state.imageUrl||'IMAGE_URL_HERE'}');
+}
+
+html, body {
+  background-color: #0a0810 !important;
+  background-image: var(--theme-image) !important;
+  background-size: cover !important;
+  background-position: center top !important;
+  background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgba(6,4,12,${(state.overlayOp/100).toFixed(2)});
+  pointer-events: none;
+}
+
+#app {
+  background: transparent !important;
+  position: relative;
+  z-index: 1;
+}
+
+:root {
+  --bg:        transparent;
+  --surface:   rgba(16,10,24,${op.toFixed(2)});
+  --surface2:  rgba(22,14,32,${panelOp2});
+  --border:    rgba(120,80,180,.30);
+  --border2:   rgba(140,90,200,.40);
+  --border3:   rgba(160,100,220,.55);
+  --text:      #f0e8ff;
+  --text2:     #b090d8;
+  --text3:     #705898;
+  --gold:      ${state.accent};
+  --gold2:     ${state.accent2};
+  --gold-glow: ${state.glow};
+  --danger:    #f06060;
+  --tile-red:   #c83038;
+  --tile-blue:  #3858d0;
+  --tile-yellow:#c8a028;
+  --felt:      rgba(12,6,20,${feltOp});
+  --felt2:     rgba(8,4,16,${Math.min(parseFloat(feltOp)+0.06,1).toFixed(2)});
+  --felt-line: rgba(216,152,255,.09);
+}
+
+.block, .mode-panel, .mode-tabs {
+  background: var(--surface) !important;
+  backdrop-filter: blur(${state.blur}px) !important;
+  -webkit-backdrop-filter: blur(${state.blur}px) !important;
+  border-color: var(--border) !important;
+}
+.block::before, .panel::before {
+  background: linear-gradient(90deg,transparent,var(--gold2),transparent) !important;
+}
+.player-tile, .status-bar, .action-bar, .memo-area {
+  background: var(--surface) !important;
+  backdrop-filter: blur(${state.blur}px) !important;
+  -webkit-backdrop-filter: blur(${state.blur}px) !important;
+  border-color: var(--border) !important;
+}
+.felt-area {
+  background: radial-gradient(ellipse 80% 60% at 50% 30%,rgba(30,0,50,.45) 0%,transparent 70%), var(--felt) !important;
+  backdrop-filter: blur(${Math.round(state.blur*0.5)}px) !important;
+  -webkit-backdrop-filter: blur(${Math.round(state.blur*0.5)}px) !important;
+  border-color: var(--border) !important;
+}
+.panel {
+  background: rgba(14,8,24,.90) !important;
+  backdrop-filter: blur(${state.blur+6}px) !important;
+  -webkit-backdrop-filter: blur(${state.blur+6}px) !important;
+  border-color: var(--border2) !important;
+}
+.wordmark {
+  background: ${state.grad} !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+.turn-badge { border-color: var(--gold2) !important; color: var(--gold) !important; background: var(--gold-glow) !important; }
+.act.declare-btn { border-color: var(--gold2) !important; color: var(--gold) !important; }
+.act.declare-btn:hover { background: var(--gold-glow) !important; }
+.notif { background: rgba(216,152,255,.07) !important; border-color: rgba(216,152,255,.22) !important; color: var(--gold) !important; }
+.btn-primary { border-color: var(--gold2) !important; color: var(--gold) !important; }
+.btn-primary:hover { background: var(--gold-glow) !important; border-color: var(--gold) !important; }
+.pane-btn.primary { border-color: var(--gold2) !important; color: var(--gold) !important; }
+.pane-btn.primary:hover { background: var(--gold-glow) !important; }
+.mode-tab.active { background: rgba(216,152,255,.10) !important; color: var(--gold) !important; box-shadow: inset 0 -2px 0 var(--gold2) !important; }
+.rcd-code { color: var(--gold) !important; }
+.input:focus { border-bottom-color: var(--gold) !important; }
+.status-dot { background: var(--gold2) !important; }
+.status-dot.live { background: #60e8a8 !important; }
+.tile-slot.back { background: linear-gradient(145deg,rgba(30,14,50,.9),rgba(14,6,24,.95)) !important; border-color: rgba(216,152,255,.18) !important; }
+.tile-slot.back::after { color: rgba(216,152,255,.25) !important; }
+.felt-label { color: rgba(216,152,255,.6) !important; }
+.equip-step-dot.active { background: var(--gold) !important; }
+.equip-step-dot.done   { background: var(--gold2) !important; }`;
+
+  document.getElementById('cssCode').textContent = css;
+  document.getElementById('cssOutput').style.display = 'block';
+  document.getElementById('cssOutput').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function copyCSS(){
+  const text = document.getElementById('cssCode').textContent;
+  try{
+    await navigator.clipboard.writeText(text);
+    const btn = document.querySelector('.css-copy-btn');
+    btn.textContent = '✓ コピー済み';
+    setTimeout(()=>btn.textContent='コピー',1800);
+  }catch(e){
+    alert('コピーできませんでした。手動でテキストを選択してコピーしてください。');
+  }
+}
+</script>
+</body>
+</html>
